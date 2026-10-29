@@ -210,12 +210,36 @@ public class BibliotecaForm : Form
     private void Recorridos() => Operacion("Recorridos BFS y DFS", "Ejecutar recorridos", (a, b, t) => t.Text = grafo.DescribirBFSyDFS(a, b), limitarDestinos: true);
     private void Conectividad() => Operacion("Conectividad - Union Find", "Verificar / Convenio", (a, b, t) =>
     {
-        if (uf.EstanConectadas(a, b)) { t.Text = "Las sedes ya pertenecen a la misma red conectada."; return; }
-        if (MessageBox.Show("Redes separadas. ¿Registrar convenio y ruta bidireccional de 30 minutos?", "Nuevo convenio", MessageBoxButtons.YesNo) != DialogResult.Yes)
-        { t.Text = "Convenio cancelado."; return; }
-        uf.Unir(a, b);
+        if (a == b)
+        {
+            string mensaje = "Has seleccionado la misma sede como origen y destino. Selecciona dos sedes diferentes.";
+            t.Text = mensaje;
+            MessageBox.Show(this, mensaje, "Selección de sedes", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (uf.EstanConectadas(a, b))
+        {
+            string mensaje = $"Las sedes {a} y {b} ya están conectadas en la misma red. No es necesario crear un convenio.";
+            t.Text = mensaje;
+            MessageBox.Show(this, mensaje, "Sedes conectadas", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        string pregunta = $"Las sedes {a} y {b} no están conectadas.\n\n¿Deseas establecer un convenio y agregar una ruta bidireccional de 30 minutos?";
+        t.Text = $"SIN CONEXIÓN\r\n\r\n{a} y {b} pertenecen a redes separadas.";
+        DialogResult respuesta = MessageBox.Show(this, pregunta, "Nuevo convenio", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        if (respuesta != DialogResult.Yes)
+        {
+            t.Text += "\r\n\r\nNo se creó ningún convenio.";
+            return;
+        }
+
         grafo.AgregarRuta(a, b, 30, true);
-        t.Text = $"Convenio registrado: {a} <-> {b} (30 minutos).";
+        uf.Unir(a, b);
+        string confirmacion = $"Convenio registrado correctamente.\n\n{a} <-> {b}\nTiempo de traslado: 30 minutos.";
+        t.Text = confirmacion.Replace("\n", "\r\n");
+        MessageBox.Show(this, confirmacion, "Convenio registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
     });
     private void Registrar()
     {
