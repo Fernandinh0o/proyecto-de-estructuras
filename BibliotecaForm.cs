@@ -234,86 +234,43 @@ public class BibliotecaForm : Form
     private void Recorridos()
     {
         if (!Listo()) return;
-        Pantalla("Comparación de recorridos BFS y DFS");
-
-        FlowLayoutPanel seleccion = Fila();
-        ComboBox origen = new() { Width = 190, DropDownStyle = ComboBoxStyle.DropDownList };
-        ComboBox destino = new() { Width = 190, DropDownStyle = ComboBoxStyle.DropDownList };
+        TextBox salida = Salida("BFS y DFS - Comparación de rutas");
+        FlowLayoutPanel panel = Fila();
+        ComboBox origen = new() { Width = 195, DropDownStyle = ComboBoxStyle.DropDownList };
+        ComboBox destino = new() { Width = 195, DropDownStyle = ComboBoxStyle.DropDownList };
         string[] sedes = grafo.ObtenerSedes().ToArray();
         origen.Items.AddRange(sedes);
+        destino.Items.AddRange(sedes);
 
-        TableLayoutPanel resultados = new()
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 2,
-            RowCount = 2,
-            Padding = new Padding(6)
-        };
-        resultados.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-        resultados.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-        resultados.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
-        resultados.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-
-        Label tituloBfs = new() { Text = "BFS - Búsqueda en anchura", Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 12, FontStyle.Bold),
-            ForeColor = Color.FromArgb(35, 80, 145) };
-        Label tituloDfs = new() { Text = "DFS - Búsqueda en profundidad", Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 12, FontStyle.Bold),
-            ForeColor = Color.FromArgb(35, 105, 85) };
-        TextBox bfs = new() { Multiline = true, ReadOnly = true, Dock = DockStyle.Fill,
-            ScrollBars = ScrollBars.Vertical, Font = new Font("Consolas", 10), BackColor = Color.White };
-        TextBox dfs = new() { Multiline = true, ReadOnly = true, Dock = DockStyle.Fill,
-            ScrollBars = ScrollBars.Vertical, Font = new Font("Consolas", 10), BackColor = Color.White };
-        resultados.Controls.Add(tituloBfs, 0, 0);
-        resultados.Controls.Add(tituloDfs, 1, 0);
-        resultados.Controls.Add(bfs, 0, 1);
-        resultados.Controls.Add(dfs, 1, 1);
-
-        void MostrarAmbos()
+        void MostrarRecorridos()
         {
             if (origen.SelectedItem == null || destino.SelectedItem == null)
             {
-                bfs.Text = "Selecciona un origen y un destino.";
-                dfs.Text = bfs.Text;
+                salida.Text = "Selecciona un origen y un destino para comparar BFS y DFS.";
                 return;
             }
             string desde = origen.SelectedItem.ToString()!;
             string hasta = destino.SelectedItem.ToString()!;
-            string resultado = grafo.DescribirBFSyDFS(desde, hasta);
-            int inicioBfs = resultado.IndexOf("BFS - BÚSQUEDA EN ANCHURA", StringComparison.Ordinal);
-            int inicioDfs = resultado.IndexOf("DFS - BÚSQUEDA EN PROFUNDIDAD", StringComparison.Ordinal);
-            if (inicioBfs < 0 || inicioDfs < 0)
-            {
-                bfs.Text = resultado;
-                dfs.Text = resultado;
-                return;
-            }
-            string encabezado = $"Origen: {desde}{Environment.NewLine}Destino: {hasta}{Environment.NewLine}{Environment.NewLine}";
-            bfs.Text = encabezado + resultado.Substring(inicioBfs, inicioDfs - inicioBfs).Trim();
-            dfs.Text = encabezado + resultado.Substring(inicioDfs).Trim();
+            // Ambos resultados se generan juntos, sin ocultar BFS.
+            salida.Text = grafo.DescribirBFSyDFS(desde, hasta);
+            salida.SelectionStart = 0;
+            salida.ScrollToCaret();
         }
 
-        void ActualizarDestinos()
+        origen.SelectedIndexChanged += (_, _) => Seguro(MostrarRecorridos);
+        destino.SelectedIndexChanged += (_, _) => Seguro(MostrarRecorridos);
+        panel.Controls.Add(new Label { Text = "Origen:", AutoSize = true });
+        panel.Controls.Add(origen);
+        panel.Controls.Add(new Label { Text = "Destino:", AutoSize = true });
+        panel.Controls.Add(destino);
+        panel.Controls.Add(Accion("Mostrar BFS y DFS", () => Seguro(MostrarRecorridos)));
+        cuerpo.Controls.Add(panel);
+        panel.BringToFront();
+        if (sedes.Length > 0)
         {
-            destino.Items.Clear();
-            if (origen.SelectedItem == null) return;
-            string[] disponibles = grafo.ObtenerDestinosAlcanzables(origen.SelectedItem.ToString()!).ToArray();
-            destino.Items.AddRange(disponibles);
-            if (disponibles.Length > 0) destino.SelectedIndex = 0;
-            else MostrarAmbos();
+            origen.SelectedIndex = 0;
+            destino.SelectedIndex = 0;
         }
-
-        origen.SelectedIndexChanged += (_, _) => ActualizarDestinos();
-        destino.SelectedIndexChanged += (_, _) => Seguro(MostrarAmbos);
-        seleccion.Controls.Add(new Label { Text = "Origen:", AutoSize = true });
-        seleccion.Controls.Add(origen);
-        seleccion.Controls.Add(new Label { Text = "Destino:", AutoSize = true });
-        seleccion.Controls.Add(destino);
-        seleccion.Controls.Add(Accion("Comparar BFS y DFS", () => Seguro(MostrarAmbos)));
-        cuerpo.Controls.Add(resultados);
-        cuerpo.Controls.Add(seleccion);
-        seleccion.BringToFront();
-        if (sedes.Length > 0) origen.SelectedIndex = 0;
     }
     private void Conectividad() => Operacion("Conectividad - Union Find", "Verificar / Convenio", (a, b, t) =>
     {
