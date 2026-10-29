@@ -84,7 +84,7 @@ public class BibliotecaForm : Form
         b.Click += (_, _) => accion();
         return b;
     }
-    private static FlowLayoutPanel Fila() => new() { Dock = DockStyle.Top, Height = 110, Padding = new Padding(8), AutoScroll = true };
+    private static FlowLayoutPanel Fila() => new() { Dock = DockStyle.Top, Height = 115, Padding = new Padding(8), AutoScroll = true, WrapContents = true };
     private static string Capturar(Action accion)
     {
         TextWriter original = Console.Out;
@@ -111,20 +111,25 @@ public class BibliotecaForm : Form
         panel.Controls.Add(Accion("Buscar por código", () => MessageBox.Show(hash.Buscar(codigo.Text.Trim())?.ToString() ?? "Libro no encontrado.")));
         panel.Controls.Add(prefijo);
         panel.Controls.Add(lista);
+        Label detalle = new() { AutoSize = true, MaximumSize = new Size(650, 0), Font = new Font("Segoe UI", 11), Text = "Selecciona un título para consultar sus datos." };
+        panel.Controls.Add(detalle);
         prefijo.TextChanged += (_, _) =>
         {
             lista.Items.Clear();
             if (string.IsNullOrWhiteSpace(prefijo.Text)) return;
-            string salida = Capturar(() => trie.BuscarPorPrefijo(prefijo.Text));
-            foreach (string linea in salida.Split('\n'))
-            {
-                string texto = linea.Trim();
-                int pos = texto.IndexOf(". ");
-                if (pos > 0 && int.TryParse(texto[..pos], out _))
-                    lista.Items.Add(texto[(pos + 2)..]);
-            }
+            foreach (string sugerencia in trie.ObtenerSugerencias(prefijo.Text))
+                lista.Items.Add(sugerencia);
+            detalle.Text = lista.Items.Count == 0 ? "No se encontraron títulos con ese prefijo." : "Selecciona un título para consultar sus datos.";
         };
-        lista.DoubleClick += (_, _) => { if (lista.SelectedItem != null) prefijo.Text = lista.SelectedItem.ToString() ?? ""; };
+        void MostrarDetalle()
+        {
+            if (lista.SelectedItem == null) return;
+            string seleccionado = lista.SelectedItem.ToString() ?? "";
+            Libro? libro = hash.ObtenerTodos().FirstOrDefault(l => l.Titulo.Equals(seleccionado, StringComparison.OrdinalIgnoreCase));
+            detalle.Text = libro?.ToString() ?? "No se encontró información para este título.";
+        }
+        lista.SelectedIndexChanged += (_, _) => MostrarDetalle();
+        lista.DoubleClick += (_, _) => MostrarDetalle();
         cuerpo.Controls.Add(panel);
     }
     private void Red()
@@ -158,8 +163,8 @@ public class BibliotecaForm : Form
         cuerpo.Controls.Add(panel);
         panel.BringToFront();
     }
-    private void Dijkstra() => Operacion("Ruta más rápida - Dijkstra", "Calcular ruta", (a, b, t) => t.Text = Capturar(() => grafo.RutaMasRapida(a, b)));
-    private void Recorridos() => Operacion("Recorridos BFS y DFS", "Ejecutar recorridos", (a, b, t) => t.Text = Capturar(() => { grafo.RecorridoBFS(a, b); grafo.RecorridoDFS(a); }));
+    private void Dijkstra() => Operacion("Ruta más rápida - Dijkstra", "Calcular ruta", (a, b, t) => t.Text = grafo.DescribirDijkstra(a, b));
+    private void Recorridos() => Operacion("Recorridos BFS y DFS", "Ejecutar recorridos", (a, b, t) => t.Text = grafo.DescribirBFSyDFS(a, b));
     private void Conectividad() => Operacion("Conectividad - Union Find", "Verificar / Convenio", (a, b, t) =>
     {
         if (uf.EstanConectadas(a, b)) { t.Text = "Las sedes ya pertenecen a la misma red conectada."; return; }
