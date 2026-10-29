@@ -79,6 +79,24 @@ public class GrafoSedes
     }
 
 
+    // Devuelve todas las sedes alcanzables, incluso mediante rutas intermedias.
+    public List<string> ObtenerDestinosAlcanzables(string origen)
+    {
+        if (!ExisteSede(origen)) return new List<string>();
+        var visitadas = new HashSet<string> { origen };
+        var pendientes = new Queue<string>();
+        pendientes.Enqueue(origen);
+        while (pendientes.Count > 0)
+        {
+            string actual = pendientes.Dequeue();
+            foreach (var arista in listaAdyacencia[actual])
+                if (visitadas.Add(arista.Destino))
+                    pendientes.Enqueue(arista.Destino);
+        }
+        visitadas.Remove(origen); // Evita ofrecer un traslado a la misma sede.
+        return visitadas.OrderBy(x => x).ToList();
+    }
+
     // Resultados consumibles directamente por la interfaz gráfica.
     public string DescribirDijkstra(string origen, string destino)
     {
