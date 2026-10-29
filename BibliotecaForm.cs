@@ -234,38 +234,101 @@ public class BibliotecaForm : Form
     private void Recorridos()
     {
         if (!Listo()) return;
-        TextBox salida = Salida("BFS y DFS - Comparación de rutas");
-        FlowLayoutPanel panel = Fila();
-        ComboBox origen = new() { Width = 195, DropDownStyle = ComboBoxStyle.DropDownList };
-        ComboBox destino = new() { Width = 195, DropDownStyle = ComboBoxStyle.DropDownList };
+        Pantalla("BFS y DFS - Comparación de rutas");
+
+        FlowLayoutPanel controles = Fila();
+        controles.Height = 75;
+        ComboBox origen = new() { Width = 180, DropDownStyle = ComboBoxStyle.DropDownList };
+        ComboBox destino = new() { Width = 180, DropDownStyle = ComboBoxStyle.DropDownList };
         string[] sedes = grafo.ObtenerSedes().ToArray();
         origen.Items.AddRange(sedes);
         destino.Items.AddRange(sedes);
 
-        void MostrarRecorridos()
+        TableLayoutPanel comparacion = new()
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 2,
+            Padding = new Padding(5),
+            BackColor = Color.White
+        };
+        comparacion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        comparacion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        comparacion.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
+        comparacion.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        Label etiquetaBfs = new()
+        {
+            Text = "BFS - CAMINO MÁS CORTO",
+            Dock = DockStyle.Fill,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Font = new Font("Segoe UI", 12, FontStyle.Bold),
+            ForeColor = Color.FromArgb(30, 85, 155)
+        };
+        Label etiquetaDfs = new()
+        {
+            Text = "DFS - CAMINO EN PROFUNDIDAD",
+            Dock = DockStyle.Fill,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Font = new Font("Segoe UI", 12, FontStyle.Bold),
+            ForeColor = Color.FromArgb(30, 110, 85)
+        };
+        TextBox resultadoBfs = new()
+        {
+            Multiline = true, ReadOnly = true, Dock = DockStyle.Fill,
+            ScrollBars = ScrollBars.Vertical, Font = new Font("Consolas", 11),
+            BackColor = Color.FromArgb(241, 247, 255)
+        };
+        TextBox resultadoDfs = new()
+        {
+            Multiline = true, ReadOnly = true, Dock = DockStyle.Fill,
+            ScrollBars = ScrollBars.Vertical, Font = new Font("Consolas", 11),
+            BackColor = Color.FromArgb(241, 250, 246)
+        };
+        comparacion.Controls.Add(etiquetaBfs, 0, 0);
+        comparacion.Controls.Add(etiquetaDfs, 1, 0);
+        comparacion.Controls.Add(resultadoBfs, 0, 1);
+        comparacion.Controls.Add(resultadoDfs, 1, 1);
+
+        void MostrarAmbos()
         {
             if (origen.SelectedItem == null || destino.SelectedItem == null)
             {
-                salida.Text = "Selecciona un origen y un destino para comparar BFS y DFS.";
+                resultadoBfs.Text = "Selecciona origen y destino.";
+                resultadoDfs.Text = "Selecciona origen y destino.";
                 return;
             }
             string desde = origen.SelectedItem.ToString()!;
             string hasta = destino.SelectedItem.ToString()!;
-            // Ambos resultados se generan juntos, sin ocultar BFS.
-            salida.Text = grafo.DescribirBFSyDFS(desde, hasta);
-            salida.SelectionStart = 0;
-            salida.ScrollToCaret();
+            string texto = grafo.DescribirBFSyDFS(desde, hasta);
+            const string marcaBfs = "BFS - CAMINO MÁS CORTO (MENOS TRAMOS)";
+            const string marcaDfs = "DFS - CAMINO POR PROFUNDIDAD";
+            int posicionBfs = texto.IndexOf(marcaBfs, StringComparison.Ordinal);
+            int posicionDfs = texto.IndexOf(marcaDfs, StringComparison.Ordinal);
+            if (posicionBfs < 0 || posicionDfs < 0 || posicionDfs <= posicionBfs)
+            {
+                resultadoBfs.Text = texto;
+                resultadoDfs.Text = "No se pudo separar el resultado DFS.";
+                return;
+            }
+            string cabecera = $"Origen: {desde}{Environment.NewLine}Destino: {hasta}{Environment.NewLine}{Environment.NewLine}";
+            resultadoBfs.Text = cabecera + texto.Substring(posicionBfs, posicionDfs - posicionBfs).Trim();
+            resultadoDfs.Text = cabecera + texto.Substring(posicionDfs).Trim();
+            resultadoBfs.SelectionStart = 0;
+            resultadoDfs.SelectionStart = 0;
         }
 
-        origen.SelectedIndexChanged += (_, _) => Seguro(MostrarRecorridos);
-        destino.SelectedIndexChanged += (_, _) => Seguro(MostrarRecorridos);
-        panel.Controls.Add(new Label { Text = "Origen:", AutoSize = true });
-        panel.Controls.Add(origen);
-        panel.Controls.Add(new Label { Text = "Destino:", AutoSize = true });
-        panel.Controls.Add(destino);
-        panel.Controls.Add(Accion("Mostrar BFS y DFS", () => Seguro(MostrarRecorridos)));
-        cuerpo.Controls.Add(panel);
-        panel.BringToFront();
+        origen.SelectedIndexChanged += (_, _) => Seguro(MostrarAmbos);
+        destino.SelectedIndexChanged += (_, _) => Seguro(MostrarAmbos);
+        controles.Controls.Add(new Label { Text = "Origen:", AutoSize = true });
+        controles.Controls.Add(origen);
+        controles.Controls.Add(new Label { Text = "Destino:", AutoSize = true });
+        controles.Controls.Add(destino);
+        controles.Controls.Add(Accion("Mostrar ambos", () => Seguro(MostrarAmbos)));
+
+        cuerpo.Controls.Add(comparacion);
+        cuerpo.Controls.Add(controles);
+        controles.BringToFront();
         if (sedes.Length > 0)
         {
             origen.SelectedIndex = 0;
