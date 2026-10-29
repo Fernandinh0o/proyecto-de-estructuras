@@ -27,7 +27,7 @@ public class BibliotecaForm : Form
         Controls.Add(titulo);
         Controls.Add(menu);
         var opciones = new (string, Action)[] {
-            ("1. Cargar datos", Cargar),
+            ("1. Cargar datos CSV", Cargar),
             ("2. Mostrar libros", Libros),
             ("3. Buscar libros", Buscar),
             ("4. Red de sedes", Red),
@@ -71,16 +71,26 @@ public class BibliotecaForm : Form
     private bool Listo()
     {
         if (cargado) return true;
-        MessageBox.Show("Primero carga los datos de ejemplo.");
+        MessageBox.Show("Primero carga los archivos CSV.");
         return false;
     }
     private void Cargar()
     {
-        hash = new(); trie = new(); grafo = new(); uf = new();
-        DatosEjemplo.Cargar(hash, trie, grafo, uf);
+        using FolderBrowserDialog selector = new()
+        {
+            Description = "Selecciona la carpeta que contiene sedes.csv, rutas.csv y libros.csv",
+            UseDescriptionForTitle = true
+        };
+        if (selector.ShowDialog(this) != DialogResult.OK) return;
+        var datos = ImportadorCsv.Cargar(selector.SelectedPath);
+        hash = datos.hash;
+        trie = datos.trie;
+        grafo = datos.grafo;
+        uf = datos.uf;
         cargado = true;
         Libros();
-        MessageBox.Show("Datos cargados correctamente.");
+        MessageBox.Show(this, "Archivos CSV cargados correctamente.", "Importación completa",
+            MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
     private void Libros()
     {
