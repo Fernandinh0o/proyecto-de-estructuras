@@ -44,6 +44,20 @@ public class BibliotecaForm : Form
             boton.Click += (_, _) => Seguro(opcion.Item2);
             menu.Controls.Add(boton);
         }
+        Button salir = new()
+        {
+            Text = "Salir del programa",
+            Dock = DockStyle.Bottom,
+            Height = 50,
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(178, 49, 58),
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI", 10, FontStyle.Bold)
+        };
+        salir.FlatAppearance.BorderSize = 0;
+        salir.Click += (_, _) => Application.Exit();
+        menu.Controls.Add(salir);
+        salir.BringToFront();
         Pantalla("Sistema de gestión de biblioteca");
         cuerpo.Controls.Add(new Label { Dock = DockStyle.Fill, Text = "Selecciona 'Cargar datos' para comenzar.", TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 14) });
     }
