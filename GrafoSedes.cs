@@ -129,37 +129,63 @@ public class GrafoSedes
 
     public string DescribirBFSyDFS(string origen, string destino)
     {
-        if (!ExisteSede(origen) || !ExisteSede(destino)) return "Una o ambas sedes no existen.";
-        var visitados = new HashSet<string> { origen };
+        if (!ExisteSede(origen) || !ExisteSede(destino))
+            return "Una o ambas sedes no existen.";
+
+        // BFS: encuentra un camino con el menor número de tramos.
+        var visitadosBfs = new HashSet<string> { origen };
         var cola = new Queue<string>();
-        var previos = new Dictionary<string, string>();
+        var previosBfs = new Dictionary<string, string>();
         var ordenBfs = new List<string>();
         cola.Enqueue(origen);
         while (cola.Count > 0)
         {
             string actual = cola.Dequeue();
             ordenBfs.Add(actual);
+            if (actual == destino) break;
             foreach (var ruta in listaAdyacencia[actual])
-                if (visitados.Add(ruta.Destino))
+            {
+                if (visitadosBfs.Add(ruta.Destino))
                 {
-                    previos[ruta.Destino] = actual;
+                    previosBfs[ruta.Destino] = actual;
                     cola.Enqueue(ruta.Destino);
                 }
+            }
         }
+
+        // DFS: busca un camino concreto hacia el destino y se detiene al encontrarlo.
+        var visitadosDfs = new HashSet<string>();
         var ordenDfs = new List<string>();
-        var dfsVisitados = new HashSet<string>();
-        void Visitar(string sede)
+        var caminoDfs = new List<string>();
+        bool BuscarDfs(string actual)
         {
-            dfsVisitados.Add(sede);
-            ordenDfs.Add(sede);
-            foreach (var ruta in listaAdyacencia[sede])
-                if (!dfsVisitados.Contains(ruta.Destino)) Visitar(ruta.Destino);
+            visitadosDfs.Add(actual);
+            ordenDfs.Add(actual);
+            caminoDfs.Add(actual);
+            if (actual == destino) return true;
+            foreach (var ruta in listaAdyacencia[actual])
+            {
+                if (!visitadosDfs.Contains(ruta.Destino) && BuscarDfs(ruta.Destino))
+                    return true;
+            }
+            caminoDfs.RemoveAt(caminoDfs.Count - 1);
+            return false;
         }
-        Visitar(origen);
-        string rutaBfs = visitados.Contains(destino)
-            ? $"{string.Join(" -> ", ConstruirCamino(previos, origen, destino))} ({ConstruirCamino(previos, origen, destino).Count - 1} tramos)"
-            : "No hay conexión entre las sedes seleccionadas.";
-        return $"BFS - BÚSQUEDA EN ANCHURA\r\n{string.Join(" -> ", ordenBfs)}\r\n\r\nCamino con menos tramos hacia {destino}:\r\n{rutaBfs}\r\n\r\nDFS - BÚSQUEDA EN PROFUNDIDAD\r\n{string.Join(" -> ", ordenDfs)}\r\n\r\nSedes alcanzables: {ordenDfs.Count} de {listaAdyacencia.Count}.";
+        bool encontradoDfs = BuscarDfs(origen);
+
+        string caminoBfs = visitadosBfs.Contains(destino)
+            ? string.Join(" -> ", ConstruirCamino(previosBfs, origen, destino))
+            : "No existe ruta dirigida hacia el destino.";
+        string caminoProfundidad = encontradoDfs
+            ? string.Join(" -> ", caminoDfs)
+            : "No existe ruta dirigida hacia el destino.";
+
+        return $"ORIGEN: {origen}\r\nDESTINO: {destino}\r\n\r\n" +
+               $"BFS - BÚSQUEDA EN ANCHURA\r\nCamino (menos tramos): {caminoBfs}\r\n" +
+               $"Tramos: {(visitadosBfs.Contains(destino) ? ConstruirCamino(previosBfs, origen, destino).Count - 1 : 0)}\r\n" +
+               $"Orden de exploración: {string.Join(" -> ", ordenBfs)}\r\n\r\n" +
+               $"DFS - BÚSQUEDA EN PROFUNDIDAD\r\nCamino encontrado: {caminoProfundidad}\r\n" +
+               $"Orden de exploración: {string.Join(" -> ", ordenDfs)}";
     }
 
     // =========================================================================
