@@ -140,7 +140,7 @@ public class BibliotecaForm : Form
             + Environment.NewLine + Environment.NewLine + "RUTAS DIRIGIDAS:" + Environment.NewLine
             + string.Join(Environment.NewLine, grafo.ObtenerRutas().Select(r => $"{r.Origen} -> {r.Destino} ({r.Minutos} minutos)"));
     }
-    private void Operacion(string nombre, string texto, Action<string, string, TextBox> ejecutar)
+    private void Operacion(string nombre, string texto, Action<string, string, TextBox> ejecutar, bool limitarDestinos = false)
     {
         if (!Listo()) return;
         TextBox salida = Salida(nombre);
@@ -150,21 +150,64 @@ public class BibliotecaForm : Form
         var sedes = grafo.ObtenerSedes().ToArray();
         origen.Items.AddRange(sedes);
         destino.Items.AddRange(sedes);
-        if (sedes.Length > 0) { origen.SelectedIndex = 0; destino.SelectedIndex = Math.Min(1, sedes.Length - 1); }
+        Label aviso = new()
+        {
+            AutoSize = true,
+            ForeColor = Color.FromArgb(85, 95, 110),
+            Text = limitarDestinos
+                ? "Elige un origen: solo aparecerán destinos con una ruta existente."
+                : "Selecciona dos sedes."
+        };
+        Button ejecutarBoton = Accion(texto, () => Seguro(() =>
+        {
+            if (origen.SelectedItem == null || destino.SelectedItem == null)
+            {
+                salida.Text = "No hay un traslado disponible para la selección actual.";
+                return;
+            }
+            string desde = origen.SelectedItem.ToString()!;
+            string hasta = destino.SelectedItem.ToString()!;
+            if (limitarDestinos && !grafo.ObtenerDestinosAlcanzables(desde).Contains(hasta))
+            {
+                salida.Text = "No existe una ruta entre las sedes seleccionadas.";
+                return;
+            }
+            ejecutar(desde, hasta, salida);
+        }));
+        void ActualizarDestinos()
+        {
+            destino.Items.Clear();
+            if (origen.SelectedItem == null) return;
+            string desde = origen.SelectedItem.ToString()!;
+            string[] disponibles = limitarDestinos
+                ? grafo.ObtenerDestinosAlcanzables(desde).ToArray()
+                : sedes;
+            destino.Items.AddRange(disponibles);
+            if (disponibles.Length > 0) destino.SelectedIndex = 0;
+            ejecutarBoton.Enabled = disponibles.Length > 0;
+            if (limitarDestinos)
+            {
+                aviso.Text = disponibles.Length > 0
+                    ? $"Destinos disponibles desde {desde}: {disponibles.Length}."
+                    : $"No hay rutas de traslado desde {desde}.";
+                salida.Text = disponibles.Length > 0
+                    ? "Selecciona un destino y ejecuta el recorrido."
+                    : $"La sede {desde} no tiene destinos alcanzables en la red actual.";
+            }
+        }
+        origen.SelectedIndexChanged += (_, _) => ActualizarDestinos();
+        if (sedes.Length > 0) origen.SelectedIndex = 0;
         panel.Controls.Add(new Label { Text = "Origen:", AutoSize = true });
         panel.Controls.Add(origen);
         panel.Controls.Add(new Label { Text = "Destino:", AutoSize = true });
         panel.Controls.Add(destino);
-        panel.Controls.Add(Accion(texto, () => Seguro(() =>
-        {
-            if (origen.SelectedItem == null || destino.SelectedItem == null) throw new Exception("Selecciona ambas sedes.");
-            ejecutar(origen.SelectedItem.ToString()!, destino.SelectedItem.ToString()!, salida);
-        })));
+        panel.Controls.Add(ejecutarBoton);
+        panel.Controls.Add(aviso);
         cuerpo.Controls.Add(panel);
         panel.BringToFront();
     }
-    private void Dijkstra() => Operacion("Ruta más rápida - Dijkstra", "Calcular ruta", (a, b, t) => t.Text = grafo.DescribirDijkstra(a, b));
-    private void Recorridos() => Operacion("Recorridos BFS y DFS", "Ejecutar recorridos", (a, b, t) => t.Text = grafo.DescribirBFSyDFS(a, b));
+    private void Dijkstra() => Operacion("Ruta más rápida - Dijkstra", "Calcular ruta", (a, b, t) => t.Text = grafo.DescribirDijkstra(a, b), limitarDestinos: true);
+    private void Recorridos() => Operacion("Recorridos BFS y DFS", "Ejecutar recorridos", (a, b, t) => t.Text = grafo.DescribirBFSyDFS(a, b), limitarDestinos: true);
     private void Conectividad() => Operacion("Conectividad - Union Find", "Verificar / Convenio", (a, b, t) =>
     {
         if (uf.EstanConectadas(a, b)) { t.Text = "Las sedes ya pertenecen a la misma red conectada."; return; }
