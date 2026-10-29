@@ -67,6 +67,17 @@ public class GrafoSedes
         return listaAdyacencia.ContainsKey(nombre.Trim());
     }
 
+    public List<string> ObtenerSedes() => listaAdyacencia.Keys.OrderBy(s => s).ToList();
+
+    public List<(string Origen, string Destino, int Minutos)> ObtenerRutas()
+    {
+        var rutas = new List<(string, string, int)>();
+        foreach (var par in listaAdyacencia)
+            foreach (var arista in par.Value)
+                rutas.Add((par.Key, arista.Destino, arista.CostoMinutos));
+        return rutas;
+    }
+
     // =========================================================================
     // RECORRIDO BFS (Búsqueda en Anchura)
     // =========================================================================
