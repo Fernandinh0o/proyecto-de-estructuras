@@ -180,12 +180,15 @@ public class GrafoSedes
             ? string.Join(" -> ", caminoDfs)
             : "No existe ruta dirigida hacia el destino.";
 
+        int tramosBfs = visitadosBfs.Contains(destino)
+            ? ConstruirCamino(previosBfs, origen, destino).Count - 1 : 0;
+        int tramosDfs = encontradoDfs ? caminoDfs.Count - 1 : 0;
+
         return $"ORIGEN: {origen}\r\nDESTINO: {destino}\r\n\r\n" +
-               $"BFS - BÚSQUEDA EN ANCHURA\r\nCamino (menos tramos): {caminoBfs}\r\n" +
-               $"Tramos: {(visitadosBfs.Contains(destino) ? ConstruirCamino(previosBfs, origen, destino).Count - 1 : 0)}\r\n" +
-               $"Orden de exploración: {string.Join(" -> ", ordenBfs)}\r\n\r\n" +
-               $"DFS - BÚSQUEDA EN PROFUNDIDAD\r\nCamino encontrado: {caminoProfundidad}\r\n" +
-               $"Orden de exploración: {string.Join(" -> ", ordenDfs)}";
+               $"BFS - CAMINO MÁS CORTO (MENOS TRAMOS)\r\n" +
+               $"{caminoBfs}\r\nTramos: {tramosBfs}\r\n\r\n" +
+               $"DFS - CAMINO POR PROFUNDIDAD\r\n" +
+               $"{caminoProfundidad}\r\nTramos: {tramosDfs}";
     }
 
     // =========================================================================
