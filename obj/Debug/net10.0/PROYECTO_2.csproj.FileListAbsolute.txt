@@ -1,0 +1,28 @@
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\bin\Debug\net10.0\PROYECTO_2.exe
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\bin\Debug\net10.0\PROYECTO_2.deps.json
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\bin\Debug\net10.0\PROYECTO_2.runtimeconfig.json
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\bin\Debug\net10.0\PROYECTO_2.dll
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\bin\Debug\net10.0\PROYECTO_2.pdb
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\PROYECTO_2.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\PROYECTO_2.AssemblyInfoInputs.cache
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\PROYECTO_2.AssemblyInfo.cs
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\PROYECTO_2.csproj.CoreCompileInputs.cache
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\PROYECTO_2.dll
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\refint\PROYECTO_2.dll
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\PROYECTO_2.pdb
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\PROYECTO_2.genruntimeconfig.cache
+C:\Users\porfi\Downloads\ESTRUCTURA DATOS 2\PROYECTO_2\obj\Debug\net10.0\ref\PROYECTO_2.dll
+C:\Users\Usuario\Documents\proyecto2_sindiseño\bin\Debug\net10.0\PROYECTO_2.exe
+C:\Users\Usuario\Documents\proyecto2_sindiseño\bin\Debug\net10.0\PROYECTO_2.deps.json
+C:\Users\Usuario\Documents\proyecto2_sindiseño\bin\Debug\net10.0\PROYECTO_2.runtimeconfig.json
+C:\Users\Usuario\Documents\proyecto2_sindiseño\bin\Debug\net10.0\PROYECTO_2.dll
+C:\Users\Usuario\Documents\proyecto2_sindiseño\bin\Debug\net10.0\PROYECTO_2.pdb
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\PROYECTO_2.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\PROYECTO_2.AssemblyInfoInputs.cache
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\PROYECTO_2.AssemblyInfo.cs
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\PROYECTO_2.csproj.CoreCompileInputs.cache
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\PROYECTO_2.dll
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\refint\PROYECTO_2.dll
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\PROYECTO_2.pdb
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\PROYECTO_2.genruntimeconfig.cache
+C:\Users\Usuario\Documents\proyecto2_sindiseño\obj\Debug\net10.0\ref\PROYECTO_2.dll
