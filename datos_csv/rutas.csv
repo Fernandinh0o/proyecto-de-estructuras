@@ -1,0 +1,4 @@
+Origen,Destino,Minutos,DobleVia
+Sede Central,Sede Norte,15,true
+Sede Norte,Sede Este,25,true
+Sede Central,Sede Sur,20,true
