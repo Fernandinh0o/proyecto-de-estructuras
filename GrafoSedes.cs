@@ -78,6 +78,72 @@ public class GrafoSedes
         return rutas;
     }
 
+
+    // Resultados consumibles directamente por la interfaz gráfica.
+    public string DescribirDijkstra(string origen, string destino)
+    {
+        if (!ExisteSede(origen) || !ExisteSede(destino)) return "Una o ambas sedes no existen.";
+        var distancias = listaAdyacencia.Keys.ToDictionary(x => x, _ => int.MaxValue);
+        var previos = new Dictionary<string, string>();
+        var pendientes = new HashSet<string>(listaAdyacencia.Keys);
+        distancias[origen] = 0;
+        while (pendientes.Count > 0)
+        {
+            string actual = pendientes.OrderBy(x => distancias[x]).First();
+            if (distancias[actual] == int.MaxValue) break;
+            pendientes.Remove(actual);
+            foreach (var ruta in listaAdyacencia[actual])
+            {
+                if (ruta.CostoMinutos < 0) throw new InvalidOperationException("Dijkstra requiere costos no negativos.");
+                int propuesta = distancias[actual] + ruta.CostoMinutos;
+                if (propuesta < distancias[ruta.Destino])
+                {
+                    distancias[ruta.Destino] = propuesta;
+                    previos[ruta.Destino] = actual;
+                }
+            }
+        }
+        if (distancias[destino] == int.MaxValue)
+            return $"No existe una ruta disponible entre {origen} y {destino}.";
+        var camino = ConstruirCamino(previos, origen, destino);
+        return $"RUTA MÁS RÁPIDA (DIJKSTRA)\r\n\r\nOrigen: {origen}\r\nDestino: {destino}\r\n\r\nCamino óptimo: {string.Join(" -> ", camino)}\r\nTiempo total: {distancias[destino]} minutos.";
+    }
+
+    public string DescribirBFSyDFS(string origen, string destino)
+    {
+        if (!ExisteSede(origen) || !ExisteSede(destino)) return "Una o ambas sedes no existen.";
+        var visitados = new HashSet<string> { origen };
+        var cola = new Queue<string>();
+        var previos = new Dictionary<string, string>();
+        var ordenBfs = new List<string>();
+        cola.Enqueue(origen);
+        while (cola.Count > 0)
+        {
+            string actual = cola.Dequeue();
+            ordenBfs.Add(actual);
+            foreach (var ruta in listaAdyacencia[actual])
+                if (visitados.Add(ruta.Destino))
+                {
+                    previos[ruta.Destino] = actual;
+                    cola.Enqueue(ruta.Destino);
+                }
+        }
+        var ordenDfs = new List<string>();
+        var dfsVisitados = new HashSet<string>();
+        void Visitar(string sede)
+        {
+            dfsVisitados.Add(sede);
+            ordenDfs.Add(sede);
+            foreach (var ruta in listaAdyacencia[sede])
+                if (!dfsVisitados.Contains(ruta.Destino)) Visitar(ruta.Destino);
+        }
+        Visitar(origen);
+        string rutaBfs = visitados.Contains(destino)
+            ? $"{string.Join(" -> ", ConstruirCamino(previos, origen, destino))} ({ConstruirCamino(previos, origen, destino).Count - 1} tramos)"
+            : "No hay conexión entre las sedes seleccionadas.";
+        return $"BFS - BÚSQUEDA EN ANCHURA\r\n{string.Join(" -> ", ordenBfs)}\r\n\r\nCamino con menos tramos hacia {destino}:\r\n{rutaBfs}\r\n\r\nDFS - BÚSQUEDA EN PROFUNDIDAD\r\n{string.Join(" -> ", ordenDfs)}\r\n\r\nSedes alcanzables: {ordenDfs.Count} de {listaAdyacencia.Count}.";
+    }
+
     // =========================================================================
     // RECORRIDO BFS (Búsqueda en Anchura)
     // =========================================================================
