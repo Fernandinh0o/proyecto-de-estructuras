@@ -48,6 +48,29 @@ public class TrieLibros
         actual.TituloCompleto = titulo.Trim(); // Guardamos el formato original del título
     }
 
+
+    public System.Collections.Generic.List<string> ObtenerSugerencias(string prefijo)
+    {
+        var resultados = new System.Collections.Generic.List<string>();
+        if (string.IsNullOrWhiteSpace(prefijo)) return resultados;
+        NodoTrie actual = raiz;
+        foreach (char c in prefijo.Trim().ToLowerInvariant())
+        {
+            int indice = (int)c;
+            if (indice >= 256 || actual.Hijos[indice] == null) return resultados;
+            actual = actual.Hijos[indice];
+        }
+        void Recolectar(NodoTrie nodo)
+        {
+            if (nodo.EsFinDePalabra && nodo.TituloCompleto != null)
+                resultados.Add(nodo.TituloCompleto);
+            for (int i = 0; i < nodo.Hijos.Length; i++)
+                if (nodo.Hijos[i] != null) Recolectar(nodo.Hijos[i]);
+        }
+        Recolectar(actual);
+        return resultados;
+    }
+
     // Buscar sugerencias de títulos que comiencen con un prefijo
     public void BuscarPorPrefijo(string prefijo)
     {
